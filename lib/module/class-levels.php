@@ -110,6 +110,7 @@ class Levels extends Base {
 			$slug                    = $this->make_slug( sanitize_text_field( $level['name'] ) );
 			$level_settings[ $slug ] = array(
 				'name'        => isset( $level['name'] ) ? sanitize_text_field( $level['name'] ) : sprintf( __( 'Level "%s"', 'mission-control' ), $slug ),
+				'subscription'=> isset( $level['subscription'] ) ? sanitize_text_field( $level['subscription'] ) : 0,
 				'description' => isset( $level['description'] ) ? sanitize_text_field( $level['description'] ) : sprintf( __( 'Level "%s" description.', 'mission-control' ), $slug ),
 			);
 		}
@@ -153,6 +154,7 @@ class Levels extends Base {
 			'labels' => array(
 				'col_level'                 => __( 'Level', 'mission-control' ),
 				'col_name'                  => __( 'Name', 'mission-control' ),
+				'col_subscription'          => __( 'WooComerce Subscription', 'mission-control' ),
 				'col_description'           => __( 'Description', 'mission-control' ),
 				'save_levels'               => __( 'Save Levels', 'mission-control' ),
 				'new_level'                 => __( 'New Level', 'mission-control' ),
@@ -171,9 +173,38 @@ class Levels extends Base {
 				'year'                      => __( 'Year', 'mission-control' ),
 			),
 			'levels' => $this->get_levels( true ),
+			'inputs' => array(
+				'subscriptions' => $this->list_subscriptions()
+			)
 		) );
 
 		wp_enqueue_style( 'missioncontrol_levels', $this->plugin->info['assets_url'] . 'css/missioncontrol/levels.css', array(), $this->plugin->info['version'] );
+	}
+
+	/**
+	 * List subscriptions
+	 * Returns select options of subscriptions
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string
+	 */
+	public function list_subscriptions() {
+		$options 	= "";
+		if ( Dependencies::woocommerce_subs_active_check() ) {
+			$options 	= "<option value='0'>" . __( 'Select One', 'mission-control' ) . "</option>";
+			$products = wc_get_products( array(
+				'limit' 	=> 10,
+				'orderby' 	=> 'date',
+				'order' 	=> 'DESC'
+			) );
+			foreach ( $products as $product ) {
+				if ( $product->is_type( array( 'subscription', 'subscription_variation', 'variable-subscription' ) ) ) {
+					$options .= "<option value='{$product->get_id()}'>{$product->get_name()}</option>";
+				}
+			}
+		}
+		return $options;
 	}
 
 	/**
@@ -191,6 +222,7 @@ class Levels extends Base {
 				array(
 					'unassigned' => array(
 						'name'        => __( 'Unassigned', 'mission-control' ),
+						'subscription'=> 0,
 						'description' => __( 'This site has no assigned levels. Rules can still be applied to "unassigned" sites.', 'mission-control' ),
 					),
 				),
@@ -211,10 +243,12 @@ class Levels extends Base {
 		$defaults = apply_filters( 'missioncontrol_settings_default_levels', array(
 			'basic'   => array(
 				'name'        => __( 'Basic', 'mission-control' ),
+				'subscription'=> 0,
 				'description' => __( 'Basic site with limited features. A great starting point for a website., ', 'mission-control' ),
 			),
 			'premium' => array(
 				'name'        => __( 'Premium', 'mission-control' ),
+				'subscription'=> 0,
 				'description' => __( 'Premium site with additional features and less restrictions. Take your website to the next level.', 'mission-control' ),
 			),
 		) );

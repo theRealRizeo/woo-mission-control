@@ -396,7 +396,7 @@ class PluginControl extends Extension {
 		$levels        = Plugin::get_extension( 'MissionControl\\Module\\Levels' )->get_levels( true );
 		$site_level    = Plugin::get_extension( 'MissionControl\\Module\\Levels' )->get_site_level( get_current_blog_id() );
 		$site_level    = $site_level['level'];
-		$always_active = array_keys( array_filter( $settings[ $site_level ]['always_active'] ) );
+		$always_active = is_array( $settings[ $site_level ]['always_active'] ) ? array_keys( array_filter( $settings[ $site_level ]['always_active'] ) ) : array();
 
 		foreach ( $plugins as $plugin_file => $plugin ) {
 

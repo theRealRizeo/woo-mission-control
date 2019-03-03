@@ -14,11 +14,15 @@ var MissionControl = MissionControl || {};
 
 		function render_levels() {
 
+			var footerScript = '<script type="text/javascript">';
+			footerScript += 'jQuery(function($) {';
+			footerScript += '$(document).ready(function() {';
 			var content = '<table class="levels-table widefat" cellspacing="0">' +
 			              '<thead>' +
 			              '<tr>' +
-			              '     <th class="name">' + _MissionControl_Levels.labels.col_name + '</th>' +
-			              '     <th class="description" colspan="2">' + _MissionControl_Levels.labels.col_description + '</th>' +
+						  '     <th class="name">' + _MissionControl_Levels.labels.col_name + '</th>' +
+						  '     <th class="subscription">' + _MissionControl_Levels.labels.col_subscription + '</th>' +
+			              '     <th class="description">' + _MissionControl_Levels.labels.col_description + '</th>' +
 			              '</tr>' +
 			              '</thead>' +
 			              '<tbody>';
@@ -28,13 +32,19 @@ var MissionControl = MissionControl || {};
 				counter += 1;
 				var cssClass = counter % 2 > 0 ? 'class="alternate"' : '';
 				content += '<tr id="level-' + index + '">' +
-				           '<td ' + cssClass + '><input type="text" value="' + item.name + '" /><span class="level-slug">[ ' + index + ' ]</span></td>' +
+						   '<td ' + cssClass + '><input type="text" value="' + item.name + '" /><span class="level-slug">[ ' + index + ' ]</span></td>' +
+						   '<td ' + cssClass + '><select class="select-level-' + index + '">' + _MissionControl_Levels.inputs.subscriptions + '</select></td>' +
 				           '<td ' + cssClass + '><textarea>' + item.description + '</textarea></td>' +
 				           '<td ' + cssClass + '><button class="button-delete-level">&times;</button></td>' +
-				           '</tr>';
+						   '</tr>';
+				footerScript += '$(".select-level-' + index + '").val("'+item.subscription+'").prop("selected", true);';
 
 			} );
+			footerScript += '});';
+			footerScript += '});';
 			content += '</tbody><table>';
+			footerScript += '</script>';
+			content += footerScript;
 
 			$( levels_element ).empty();
 			$( levels_element ).append( content );
@@ -107,6 +117,7 @@ var MissionControl = MissionControl || {};
 				var slug = make_slug( _MissionControl_Levels.labels.untitled_name );
 				levels[ slug ] = {
 					name: _MissionControl_Levels.labels.untitled_name,
+					subscription: 0,
 					description: _MissionControl_Levels.labels.untitled_description
 				};
 
@@ -130,39 +141,46 @@ var MissionControl = MissionControl || {};
 			} );
 
 			$( levels_element + ' input[type="text"], ' + levels_element + ' textarea' ).on( 'keyup', handle_keyup );
+			$( levels_element + ' select' ).on( 'change', handle_subscriptions );
 
 		}
 
 		function handle_keyup( e ) {
-				var el = e.currentTarget;
-				var parent = $( this ).parents( 'tr' )[0];
-				var item = $( parent ).attr( 'id' ).replace( 'level-', '' );
-				var field = 'input' == el.nodeName.toLowerCase() ? 'name' : 'description';
+			var el = e.currentTarget;
+			var parent = $( this ).parents( 'tr' )[0];
+			var item = $( parent ).attr( 'id' ).replace( 'level-', '' );
+			var field = 'input' == el.nodeName.toLowerCase() ? 'name' : 'description';
 
-				levels[item][field] = $( el ).val();
+			levels[item][field] = $( el ).val();
 
-				// If the name changes, we need to change the slug
-				if( field === 'name' ) {
-					var slug = make_slug( $( el ).val() );
+			// If the name changes, we need to change the slug
+			if( field === 'name' ) {
+				var slug = make_slug( $( el ).val() );
 
-					$( $( parent ).find( '.level-slug' )[0] ).empty();
-					$( $( parent ).find( '.level-slug' )[0] ).append( '[ ' + slug + ' ]' );
+				$( $( parent ).find( '.level-slug' )[0] ).empty();
+				$( $( parent ).find( '.level-slug' )[0] ).append( '[ ' + slug + ' ]' );
 
-					$( parent ).attr( 'id', 'level-' + slug );
+				$( parent ).attr( 'id', 'level-' + slug );
 
-					// But don't forget to update the levels
-					var level_keys = _.keys( levels );
-					var new_array = {};
-					$.each( level_keys, function( lindex, lkey ) {
-						if( lkey === item ) {
-							new_array[slug] = levels[lkey];
-						} else {
-							new_array[lkey] = levels[lkey];
-						}
-					} );
-					levels = new_array;
-				}
+				// But don't forget to update the levels
+				var level_keys = _.keys( levels );
+				var new_array = {};
+				$.each( level_keys, function( lindex, lkey ) {
+					if( lkey === item ) {
+						new_array[slug] = levels[lkey];
+					} else {
+						new_array[lkey] = levels[lkey];
+					}
+				} );
+				levels = new_array;
+			}
+		}
 
+		function handle_subscriptions( e ) {
+			var el = e.currentTarget;
+			var parent = $( this ).parents( 'tr' )[0];
+			var item = $( parent ).attr( 'id' ).replace( 'level-', '' );
+			levels[item]['subscription'] = $( el ).val();
 		}
 
 		function make_slug( value ) {

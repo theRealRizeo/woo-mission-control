@@ -28,10 +28,10 @@
 #levels-settings-page table td:nth-child(1) {
     width: 30%;
 }
-#levels-settings-page table td:nth-child(2) {
+#levels-settings-page table td:nth-child(3) {
     width: 60%;
 }
-#levels-settings-page table td:nth-child(3) {
+#levels-settings-page table td:nth-child(4) {
     width: 5%;
 }
 
