@@ -1,0 +1,82 @@
+#levels-settings-page table {
+    width: 95%;
+    border-collapse: collapse;
+}
+
+#levels-settings-page table tbody tr {
+    /*border: 1px solid rgba( 0,0,0,0.02);*/
+    /*border: 1px solid #e1e1e1;*/
+    /*border-top-left-radius: 10px;*/
+    /*border-bottom-left-radius: 10px;*/
+
+}
+
+#levels-settings-page table td {
+    vertical-align: top;
+    text-align: left;
+}
+
+#levels-settings-page table th {
+    padding-bottom: 10px;
+}
+
+#levels-settings-page table td {
+    cursor: move;
+    padding: 10px 5px;
+}
+
+#levels-settings-page table td:nth-child(1) {
+    width: 30%;
+}
+#levels-settings-page table td:nth-child(2) {
+    width: 60%;
+}
+#levels-settings-page table td:nth-child(3) {
+    width: 5%;
+}
+
+#levels-settings-page table input,
+#levels-settings-page table textarea {
+    width: 100%;
+}
+
+#levels-settings-page table textarea {
+    min-height: 100px;
+}
+
+
+#levels-settings-page table .level-placeholder td {
+    /*background: rgba(0,0,0,0.03);*/
+    background: #ffffff;
+    border: 1px dotted rgba(0,0,0,0.05);
+    border-left: none;
+    border-right: none;
+    min-height: 100px;
+    height: 124px;
+    padding: 0;
+    margin: 0;
+
+}
+
+#levels-settings-page input[type="button"] {
+    margin: 10px;
+}
+
+#levels-settings-page .button-delete-level {
+    background: #ff0000;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    font-weight: bold;
+    color: #ffffff;
+    line-height:1.3em;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+#levels-settings-page .button-delete-level:hover {
+    opacity: 0.8;
+}

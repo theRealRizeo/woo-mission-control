@@ -1,0 +1,58 @@
+#extensions-list-page .extension-container {
+    width: 200px;
+    /*min-height: 280px;*/
+    min-height: 135px;
+    position: relative;
+    float: left;
+    background: #ffffff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 0 10px 10px 0;
+}
+
+#extensions-list-page .extension-container h2 {
+    font-size: 1em;
+    margin:0 0 10px 0;
+}
+
+#extensions-list-page .extension-container img {
+    width: 100%;
+    max-width: 180px;
+    max-height: 135px;
+    display: block;
+}
+
+#extensions-list-page .extension-container p.description {
+    display: block; /* Fallback for non-webkit */
+    display: -webkit-box;
+    height: 94px;
+    max-height: 94px;
+    width: 100%;
+    line-height: 1.4em;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+    -ms-box-orient: vertical;
+    box-orient: vertical;
+
+    /*white-space: nowrap;*/
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#extensions-list-page .extension-container .extension-foot {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+}
+
+#extensions-list-page .extension-container .extension-foot input {
+    margin-right: 10px;
+}
+#extensions-list-page .extension-container .extension-foot a {
+    line-height: 2em;
+}
