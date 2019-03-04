@@ -53,10 +53,20 @@ class Levels extends Base {
 		parent::__construct();
 		$this->hook_by_reflection();
 		$this->plugin = $plugin;
+
+		//WooCommerce Subscription hooks
 		add_action( 'woocommerce_checkout_subscription_created', array( $this, 'subscription_created' ), 10, 3 );
 		add_action( 'woocommerce_subscription_status_updated', array( $this, 'subscription_status' ), 10, 3 );
 	}
 
+	/**
+	 * Subscription created function
+	 * Create the site when a new subscrition is made
+	 * 
+	 * @param WC_Subscription $subscription
+	 * @param WC_Subscription_Order $order
+	 * @param WC_Cart $cart
+	 */
 	function subscription_created( $subscription, $order, $cart ) {
 		if ( is_main_site() ) {
 			$current_site 	= get_current_site();
@@ -87,6 +97,13 @@ class Levels extends Base {
 		}
 	}
 
+	/**
+	 * Handle subscription update
+	 * 
+	 * @param WC_Subscription $subscription
+	 * @param string $to_status - new status
+	 * @param string $from_status - old status
+	 */
 	function subscription_status( $subscription, $to_status, $from_status ) {
 		if ( is_main_site() ) {
 			$site_id = get_post_meta( $subscription->get_id(), '_subscription_site', true );
