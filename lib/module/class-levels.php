@@ -53,6 +53,53 @@ class Levels extends Base {
 		parent::__construct();
 		$this->hook_by_reflection();
 		$this->plugin = $plugin;
+		add_action( 'woocommerce_checkout_subscription_created', array( $this, 'subscription_created' ), 10, 3 );
+		add_action( 'woocommerce_subscription_status_updated', array( $this, 'subscription_status' ), 10, 3 );
+	}
+
+	function subscription_created( $subscription, $order, $cart ) {
+		if ( is_main_site() ) {
+			$current_site 	= get_current_site();
+			$domain 		= $current_site->domain;
+
+			$meta 	= apply_filters( 'signup_create_blog_meta', array( 'lang_id' => 1, 'public' => 0, 'archived' => 1 ) );
+			$levels = $this->get_levels();
+			foreach ( $levels as $key => $level ) {
+				if ( $subscription->has_product( $level['subscription'] ) ) {
+					$path 	= get_post_meta( $order->get_id(), '_billing_site_path', true );
+					$title 	= get_post_meta( $order->get_id(), '_billing_site_title', true );
+					if ( is_subdomain_install() ) {
+						$domain = $path . '.' . preg_replace( '|^www\\.|', '', $domain );
+					}
+					$new_blog_id = wpmu_create_blog( $domain, $path, $title, $subscription->get_user_id(), $meta );
+					if ( $new_blog_id ) {
+						$site_level = $level;
+						$site_level['level'] 		  = $key;
+						$site_level['previous_level'] = 'unassigned';
+						$site_level['can_expire']     = false;
+						$site_level['expiry_date']    = '';
+						$this->update_site_level( $new_blog_id, $site_level, 'Registered' );
+						update_post_meta( $subscription->get_id(), '_subscription_site', $new_blog_id );
+						update_post_meta( $order->get_id(), '_subscription_site', $new_blog_id );
+					}
+				}
+			}
+		}
+	}
+
+	function subscription_status( $subscription, $to_status, $from_status ) {
+		if ( is_main_site() ) {
+			$site_id = get_post_meta( $subscription->get_id(), '_subscription_site', true );
+			if ( $site_id ) {
+				if ( $to_status == 'active' ) {
+					update_blog_status( $site_id, 'archived', 0 );
+					update_blog_status( $site_id, 'public', 1 );
+				} else {
+					update_blog_status( $site_id, 'archived', 1 );
+					update_blog_status( $site_id, 'public', 0 );
+				}
+			}
+		}
 	}
 
 	/**
@@ -308,7 +355,7 @@ class Levels extends Base {
 			$levels        = $this->get_levels( true );
 
 			// Deal with levels that may no longer exist.
-			if ( ! array_key_exists( $level['level'], $levels ) ) {
+			if ( isset( $level['level'] ) && ! array_key_exists( $level['level'], $levels ) ) {
 				if ( ! empty( $level['revert_level'] ) && array_key_exists( $level['revert_level'], $levels ) ) {
 					$level['level'] = $level['revert_level'];
 				} else {
@@ -320,8 +367,12 @@ class Levels extends Base {
 			$level_details = apply_filters( 'missioncontrol_site_level_details', '' );
 			$level_details = empty( $level_details ) ? '&nbsp;' : wp_kses( $level_details, wp_kses_allowed_html() );
 
-			$expires = '<small style="float: right;">' . sprintf( __( 'Exp. %s', 'mission-control' ), date( 'Y/m/d', (int) $level['expiry_date'] ) ) . '</small>';
-			$expires = empty( $level['expiry_date'] ) ? '' : $expires;
+			if ( isset( $level['expiry_date'] ) ) {
+				$expires = '<small style="float: right;">' . sprintf( __( 'Exp. %s', 'mission-control' ), date( 'Y/m/d', (int) $level['expiry_date'] ) ) . '</small>';
+				$expires = empty( $level['expiry_date'] ) ? '' : $expires;
+			} else {
+				$expires = '';
+			}
 
 			// Level Description and Details.
 			Utility::output( '<strong>' . $levels[ $level['level'] ]['name'] . '</strong> ' . $expires );
