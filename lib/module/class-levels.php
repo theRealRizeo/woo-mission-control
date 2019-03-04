@@ -280,7 +280,10 @@ class Levels extends Base {
 	 * @return array
 	 */
 	public function add_site_listing_columns( $columns ) {
-		$inserted = array( 'site_level' => '<div style="text-align: left;">' . __( 'Mission Control', 'mission-control' ) . '</div>' );
+		$inserted = array( 
+			'site_level' => '<div style="text-align: left;">' . __( 'Mission Control', 'mission-control' ) . '</div>',
+			'site_sub'	 => '<div style="text-align: left;">' . __( 'Subscription', 'mission-control' ) . '</div>'
+		 );
 
 		$columns = array_merge(
 			array_slice( $columns, 0, 2 ),
@@ -345,6 +348,22 @@ class Levels extends Base {
 				 </div>';
 
 			Utility::output( $content );
+		} else if ( 'site_sub' === $column_name ) {
+			switch_to_blog( $blog_id );
+			$email = get_bloginfo( 'admin_email' );
+			restore_current_blog();
+
+			$user = get_user_by( 'email', $email );
+			if ( $user && function_exists( 'wcs_get_users_subscriptions' ) ) {
+				$users_subscriptions = wcs_get_users_subscriptions( $user->ID );
+				if ( count( $users_subscriptions ) > 0 ) {
+					foreach ( $users_subscriptions as $subscription ) {
+						Utility::output( '<a href="'.$subscription->get_view_order_url().'">'.$subscription->get_status() .'</a>' );
+					} 
+				} else {
+					Utility::output( __( 'No Subscription', 'mission-control' ) );
+				}
+			}
 		}
 	}
 
