@@ -57,6 +57,8 @@ class Levels extends Base {
 		//WooCommerce Subscription hooks
 		add_action( 'woocommerce_checkout_subscription_created', array( $this, 'subscription_created' ), 10, 3 );
 		add_action( 'woocommerce_subscription_status_updated', array( $this, 'subscription_status' ), 10, 3 );
+
+		add_action( 'woocommerce_checkout_process', array( $this, 'site_validation' ) );
 	}
 
 	/**
@@ -80,6 +82,8 @@ class Levels extends Base {
 					$title 	= get_post_meta( $order->get_id(), '_billing_site_title', true );
 					if ( is_subdomain_install() ) {
 						$domain = $path . '.' . preg_replace( '|^www\\.|', '', $domain );
+					} else {
+						$path = ltrim( $current_site->path , '/' ) . '' . $path;
 					}
 					$new_blog_id = wpmu_create_blog( $domain, $path, $title, $subscription->get_user_id(), $meta );
 					if ( $new_blog_id ) {
@@ -114,6 +118,27 @@ class Levels extends Base {
 				} else {
 					update_blog_status( $site_id, 'archived', 1 );
 					update_blog_status( $site_id, 'public', 0 );
+				}
+			}
+		}
+	}
+
+	function site_validation() {
+		if ( is_main_site() ) {
+			if ( !empty( $_POST['billing_site_path'] ) ) {
+				$current_site 	= get_current_site();
+				$domain 		= $current_site->domain;
+				$path 			= sanitize_text_field( $_POST['billing_site_path'] );
+				if ( is_subdomain_install() ) {
+					$domain = $path . '.' . preg_replace( '|^www\\.|', '', $domain );
+				} else {
+					$path = ltrim( $current_site->path , '/' ) . '' . $path;
+				}
+
+				$exists = domain_exists( $domain, $path, $current_site->id );
+
+				if ( $exists ) {
+					wc_add_notice( 'The site path you have selected exists. Please select another site path', 'error' );
 				}
 			}
 		}
