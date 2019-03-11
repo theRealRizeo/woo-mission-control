@@ -388,7 +388,7 @@ class PluginControl extends Extension {
 	 */
 	public function all_plugins( $plugins ) {
 
-		if ( is_network_admin() ) {
+		if ( is_network_admin() || is_main_site() ) {
 			return $plugins;
 		}
 
@@ -432,6 +432,10 @@ class PluginControl extends Extension {
 	 */
 	public function activated_plugin( $plugin ) {
 
+		if ( is_network_admin() || is_main_site() ) {
+			return;
+		}
+
 		// Always allow the MissionControl plugin.
 		$is_mission_control = plugin_basename( $this->plugin->info['__FILE__'] ) === $plugin;
 
@@ -459,6 +463,10 @@ class PluginControl extends Extension {
 	 * @return mixed
 	 */
 	public function plugin_action_links( $actions, $plugin_file ) {
+
+		if ( is_network_admin() || is_main_site() ) {
+			return $actions;
+		}
 
 		$settings   = $this->get_settings( get_current_blog_id() );
 		$site_level = Plugin::get_extension( 'MissionControl\\Module\\Levels' )->get_site_level( get_current_blog_id() );
@@ -507,6 +515,10 @@ class PluginControl extends Extension {
 	 * @action pre_current_active_plugins
 	 */
 	public function pre_current_active_plugins() {
+
+		if ( is_main_site() ) {
+			return;
+		}
 
 		$settings   = $this->get_settings( get_current_blog_id() );
 		$site_level = Plugin::get_extension( 'MissionControl\\Module\\Levels' )->get_site_level( get_current_blog_id() );
