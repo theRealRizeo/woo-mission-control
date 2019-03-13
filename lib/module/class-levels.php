@@ -280,7 +280,7 @@ class Levels extends Base {
 	 */
 	public function list_subscriptions() {
 		$options 	= "";
-		if ( Dependencies::woocommerce_subs_active_check() ) {
+		if ( Dependencies::woocommerce_subs_active_check() && function_exists( 'wc_get_products' ) ) {
 			$options 	= "<option value='0'>" . __( 'Select One', 'mission-control' ) . "</option>";
 			$products = wc_get_products( array(
 				'limit' 	=> 10,
